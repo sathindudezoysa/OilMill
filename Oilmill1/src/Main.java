@@ -79,20 +79,21 @@ public class Main extends javax.swing.JFrame {
         }
     }
      
-      public static String getPassword(String title) {
+      public static String getCount(String title) {
         JPanel panel = new JPanel();
-        final JTextField passwordField = new JTextField(10);
+        final JTextField text = new JTextField(10);
         panel.add(new JLabel("Count"));
-        panel.add(passwordField);
+        panel.add(text);
         JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
             @Override
             public void selectInitialValue() {
-                passwordField.requestFocusInWindow();
+                text.requestFocusInWindow();
             }
         };
         pane.createDialog(null, title).setVisible(true);
-        return passwordField.getText().length() == 0 ? null : new String(passwordField.getText());
+        return text.getText().length() == 0 ? null : new String(text.getText());
     }
+      
       public void num1(){
           int num = Integer.parseInt(jTextField1.getText());
           if(num <= list.size() && num > 0){
@@ -117,8 +118,7 @@ public class Main extends javax.swing.JFrame {
 
         DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
         
-        for(int i = 0; i<model.getRowCount();i++){
-            
+        for(int i = 0; i<model.getRowCount();i++){            
         las ++;                       
         try{
             Connection con = getconnection();
@@ -142,6 +142,7 @@ public class Main extends javax.swing.JFrame {
             while (rs.next()) {
             list.add(rs.getString(2));
             }
+            
           //  len = list.size();
              
          }catch(Exception e){
@@ -241,6 +242,13 @@ public class Main extends javax.swing.JFrame {
         jLabel7.setText(String.valueOf(sum));
        
    }    
+   
+   public void clear(){
+       
+       DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
+       model.setRowCount(0);
+       
+   }
     
     
 
@@ -256,6 +264,7 @@ public class Main extends javax.swing.JFrame {
         getlast();
         KeyListener keyListener;
         keyListener = new KeyListener() {
+            
             @Override
             public void keyPressed(KeyEvent keyEvent) {
                 printIt("Pressed", keyEvent);
@@ -267,10 +276,12 @@ public class Main extends javax.swing.JFrame {
                 printIt("Released", keyEvent);
             }
             
+            @Override
             public void keyTyped(KeyEvent keyEvent) {
                 printIt("Typed", keyEvent);
             }
             
+        
             private void printIt(String title, KeyEvent keyEvent) {
                 int keyCode = keyEvent.getKeyCode();
                 String keyText = KeyEvent.getKeyText(keyCode);
@@ -278,7 +289,7 @@ public class Main extends javax.swing.JFrame {
                 //JOptionPane.showMessageDialog(null, keyCode);
                 System.out.println(title + " : " + keyText + " / " + keyEvent.getKeyChar());
                 if(keyEvent.getKeyCode()== KeyEvent.VK_ESCAPE){
-                    Float count = Float.valueOf(Main.getPassword(title));
+                    Float count = Float.valueOf(Main.getCount(title));
                     
                     JOptionPane.showMessageDialog(null,"Balance is: "+(count - sum));
                     writedata();
@@ -286,12 +297,12 @@ public class Main extends javax.swing.JFrame {
                     jLabel7.setText("Total");
                     sum = 0;
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_I){
-                    cashIn = Integer.parseInt(Main.getPassword(title));
+                    cashIn = Integer.parseInt(Main.getCount(title));
                     chashIn();
                     jTextField1.setText("");
                     
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_O){
-                    cashOut = Integer.parseInt(Main.getPassword(title));
+                    cashOut = Integer.parseInt(Main.getCount(title));
                     chashout();
                     jTextField1.setText("");
                     
@@ -307,10 +318,15 @@ public class Main extends javax.swing.JFrame {
                     jLabel7.setText("Total");
                     jTextField1.setText("");
                     jTextField2.setText("");
+                }else if(keyEvent.getKeyCode()== KeyEvent.VK_S){
+                    new summery().setVisible(true);
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_DOWN){
                     jTextField2.requestFocusInWindow(); 
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_UP){
                     jTextField1.requestFocusInWindow(); 
+                }else if (keyEvent.getKeyCode()== KeyEvent.VK_C){
+                    clear();
+                    jLabel2.setText("");
                 }
                 
             }
