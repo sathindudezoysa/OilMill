@@ -291,6 +291,7 @@ public class summery extends javax.swing.JFrame {
      * Creates new form summery
      */
     public summery() {
+        
         initComponents();
         jLabel12.setText(String.valueOf(this.balance()));
         jLabel13.setText(String.valueOf(this.getCashIn()));    
@@ -333,6 +334,7 @@ public class summery extends javax.swing.JFrame {
                     jButton2.requestFocusInWindow();
                 } else if (keyEvent.getKeyCode() == KeyEvent.VK_RIGHT) {
                     jButton1.requestFocusInWindow();
+                    
                 }
                 
             }
@@ -343,11 +345,18 @@ public class summery extends javax.swing.JFrame {
         
         jButton1.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {
-               daybalance();
-            }
+            public void actionPerformed(ActionEvent arg0) {              
+              summery.this.setVisible(false);
+              }
             
         }); 
+        jButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {              
+              daybalance();
+              }
+            
+        });
         
     }
 
@@ -648,6 +657,7 @@ public class summery extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new summery().setVisible(true);
+       
             }
         });
     }

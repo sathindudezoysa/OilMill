@@ -36,12 +36,9 @@ import javax.swing.KeyStroke;
  * @author sathindu
  */
 public class Main extends javax.swing.JFrame {
-   
-    int num = 0;
-    int x,len,las;
+    
     ArrayList<String> list= new ArrayList<String>();
-    JFrame f; 
-    String id,last;
+    JFrame f;     
     float amount;
     float sum = 0;
     int cashIn = 0;
@@ -84,7 +81,7 @@ public class Main extends javax.swing.JFrame {
         final JTextField text = new JTextField(10);
         panel.add(new JLabel("Count"));
         panel.add(text);
-        JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION) {
+        JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION) {
             @Override
             public void selectInitialValue() {
                 text.requestFocusInWindow();
@@ -110,20 +107,20 @@ public class Main extends javax.swing.JFrame {
      
     public void writedata(){
         
-        
-        System.out.println("work");
         DateFormat df = new SimpleDateFormat("yy/MM/dd");
         Date dateobj = new Date();
         
 
         DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
         
-        for(int i = 0; i<model.getRowCount();i++){            
-        las ++;                       
+        for(int i = 0; i<model.getRowCount();i++){  
+            int x = this.getlast();
+            x ++;
+                              
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String insert = "INSERT INTO `sales` (`id`, `Date`, `ProId`, `Name`, `quntity`, `prize`) VALUES ('"+las+"', '"+df.format(dateobj)+"', '"+model.getValueAt(i,0)+"', '"+model.getValueAt(i,1)+"', '"+model.getValueAt(i,2)+"', '"+model.getValueAt(i,3)+"');";
+            String insert = "INSERT INTO `sales` (`id`, `Date`, `ProId`, `Name`, `quntity`, `prize`) VALUES ('"+x+"', '"+df.format(dateobj)+"', '"+model.getValueAt(i,0)+"', '"+model.getValueAt(i,1)+"', '"+model.getValueAt(i,2)+"', '"+model.getValueAt(i,3)+"');";
             st.executeUpdate(insert);    
             System.out.println("inserted");
             
@@ -133,6 +130,7 @@ public class Main extends javax.swing.JFrame {
         }
         model.setRowCount(0);
     }
+    
      public void getprize(){
          try{
              Connection con = getconnection();
@@ -141,9 +139,8 @@ public class Main extends javax.swing.JFrame {
             
             while (rs.next()) {
             list.add(rs.getString(2));
-            }
-            
-          //  len = list.size();
+            }          
+          
              
          }catch(Exception e){
              System.out.println(e.getMessage());
@@ -151,8 +148,7 @@ public class Main extends javax.swing.JFrame {
         
     }
      
-    public void search(){
-        id = jTextField1.getText();
+    public void search(String id){
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
@@ -167,7 +163,8 @@ public class Main extends javax.swing.JFrame {
             System.out.println(e.getMessage());
         }
     }
-    public void getlast(){
+    public Integer getlast(){
+        int last = 0;
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
@@ -175,28 +172,23 @@ public class Main extends javax.swing.JFrame {
             ResultSet rs = st.executeQuery(q);
             
             while(rs.next()){
-               last = rs.getString(1);            
+               last = rs.getInt(1);
             }
             
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
-        las = Integer.parseInt(last);
-        System.out.println(las);
+        return last ;
     }
     
-    public void prize(){
-        x = Integer.parseInt(jTextField1.getText());
-        
-        int y = x - 1;
-            double quntity = Float.valueOf(jTextField2.getText());
+    public void prize(int x,double quntity){              
+        int y = x - 1;            
             double round = Math.round(quntity * 100.0) / 100.0;
             int value = Integer.parseInt(list.get(y));
             double totval = round * value;
             double roundOff = Math.round(totval * 100.0) / 100.0;
             DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
-            model.addRow(new Object[]{id,jLabel2.getText(),String.valueOf(round),String.valueOf(roundOff)});
-            System.out.println(round);
+            model.addRow(new Object[]{String.valueOf(x),String.valueOf(quntity),String.valueOf(round),String.valueOf(roundOff)});
             total();
             
         
@@ -249,6 +241,13 @@ public class Main extends javax.swing.JFrame {
        model.setRowCount(0);
        
    }
+   public void clean(){
+       jTextField1.setText("");
+       jTextField2.setText("");
+       jLabel2.setText("");
+       jLabel8.setText("");
+       jLabel7.setText("Total");
+   }
     
     
 
@@ -256,8 +255,9 @@ public class Main extends javax.swing.JFrame {
      * Creates new form main
      */
     public Main() {
-        num = 0;
+       
         initComponents(); 
+        clean();
         jTextField1.requestFocusInWindow();
        
         getprize();
@@ -273,12 +273,12 @@ public class Main extends javax.swing.JFrame {
             
             @Override
             public void keyReleased(KeyEvent keyEvent) {
-                printIt("Released", keyEvent);
+              // printIt("Released", keyEvent);
             }
             
             @Override
             public void keyTyped(KeyEvent keyEvent) {
-                printIt("Typed", keyEvent);
+               // printIt("Typed", keyEvent);
             }
             
         
@@ -290,43 +290,43 @@ public class Main extends javax.swing.JFrame {
                 System.out.println(title + " : " + keyText + " / " + keyEvent.getKeyChar());
                 if(keyEvent.getKeyCode()== KeyEvent.VK_ESCAPE){
                     Float count = Float.valueOf(Main.getCount(title));
-                    
+                    jLabel8.setText(String.valueOf(count));
                     JOptionPane.showMessageDialog(null,"Balance is: "+(count - sum));
                     writedata();
-                    jLabel2.setText("");
-                    jLabel7.setText("Total");
+                    clean();
                     sum = 0;
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_I){
                     cashIn = Integer.parseInt(Main.getCount(title));
                     chashIn();
-                    jTextField1.setText("");
+                    clean();
                     
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_O){
                     cashOut = Integer.parseInt(Main.getCount(title));
                     chashout();
-                    jTextField1.setText("");
+                    clean();
                     
-                }else if(keyEvent.getKeyCode()== KeyEvent.VK_V){
-                    
+                }else if(keyEvent.getKeyCode()== KeyEvent.VK_V){                      
                     getdata();
                     total();
-                    jTextField1.setText("");
-                    jTextField2.setText("");
-                }else if(keyEvent.getKeyCode()== KeyEvent.VK_C){
+                    clean();
+                    
+                }else if(keyEvent.getKeyCode()== KeyEvent.VK_C){                    
                     DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
                     model.setRowCount(0);
-                    jLabel7.setText("Total");
-                    jTextField1.setText("");
-                    jTextField2.setText("");
-                }else if(keyEvent.getKeyCode()== KeyEvent.VK_S){
+                    clean();
+                    
+                }else if(keyEvent.getKeyCode()== KeyEvent.VK_S){                    
                     new summery().setVisible(true);
+                    clean();                
+                    
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_DOWN){
                     jTextField2.requestFocusInWindow(); 
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_UP){
                     jTextField1.requestFocusInWindow(); 
                 }else if (keyEvent.getKeyCode()== KeyEvent.VK_C){
                     clear();
-                    jLabel2.setText("");
+                    clean();
+                    
                 }
                 
             }
@@ -345,7 +345,7 @@ public class Main extends javax.swing.JFrame {
     public void actionPerformed(ActionEvent e) { 
         num1();
         if(q){
-            search();   
+            search(jTextField1.getText());   
         
       jTextField2.requestFocusInWindow(); 
         }
@@ -354,7 +354,7 @@ public class Main extends javax.swing.JFrame {
     jTextField2.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                prize();
+                prize(Integer.parseInt(jTextField1.getText()),Float.valueOf(jTextField2.getText()));
                 jTextField1.setText("");
                 jTextField2.setText("");
                 jTextField1.requestFocusInWindow(); 
