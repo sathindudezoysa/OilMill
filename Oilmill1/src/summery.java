@@ -9,6 +9,10 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 /*
@@ -27,45 +31,91 @@ public class summery extends javax.swing.JFrame {
     public Connection getconnection() throws ClassNotFoundException {
         Connection con = null;        
         try {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/project1", "admin", "sathindu");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/project1", "admin", "Kasun@sathindu1");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         return con;        
     }
-    public Float balance(){
-        float last = 0;
+    public Float bal(int k){
+        float y = 0;
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "select * from DayBalance";
+            String q = "SELECT * FROM `DayBalance` WHERE `id` ="+k;
             ResultSet rs = st.executeQuery(q);
-            
             while(rs.next()){
-               last = Float.valueOf(rs.getString(2));            
+            y = Float.valueOf(rs.getString(13));
             }
             
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
         
-        System.out.println(last);
+        return y;
+        
+    }
+    
+    public Float balance(){
+        float last = 1;
+        String day = null;
+        int id = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar cal = Calendar.getInstance();
+        //Date today = cal.getTime();
+         
+        try{
+            Connection con = getconnection();
+            Statement st = con.createStatement();
+            String q = "SELECT * FROM `DayBalance`";
+            ResultSet rs = st.executeQuery(q);
+            while(rs.next()){               
+               day = rs.getString(2);
+               id = Integer.parseInt(rs.getString(1));
+               
+            }
+            
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        if(day.equals(String.valueOf(df.format(cal.getTime())))){
+            id--;
+             System.out.println(id);
+            last = this.bal(id);                  
+        }else{
+            last = this.bal(id);
+        }       
+        
         return last;
     }
     
     public void daybalance(){
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         System.out.println("work");
-        DateFormat df = new SimpleDateFormat("yy/MM/dd");
-        Date dateobj = new Date();
+        Calendar cal = Calendar.getInstance();   
+        int lastid = 0;
+        try{
+            Connection con = getconnection();
+            Statement st = con.createStatement();
+            String q = "SELECT * FROM `DayBalance`";
+            ResultSet rs = st.executeQuery(q);
+            while(rs.next()){               
+               lastid = Integer.parseInt(rs.getString(1));
+            }
+            
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        lastid++;
 
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String insert = "INSERT INTO `DayBalance` (`date`,`balance`) VALUES ('"+df.format(dateobj)+"', '"+this.total()+"');";
+            String insert = "INSERT INTO `DayBalance` (`id`,`date`, `Bottles`, `BotPrise`, `Liters`, `LitPrise`, `Kilo`, `KilPrise`, `Punak`, `PunPrise`, `CashIn`, `CashOut`, `balance`) VALUES ('"+lastid+"','"+df.format(cal.getTime())+"','"+this.searchbot()+"','"+this.searchbotprize()+"','"+this.searchlit()+"','"+this.searchlitPrize()+"','"+this.searchKilo()+"','"+this.searchKiloPrize()+"','"+this.searchPunak()+"','"+this.searchPunakPrize()+"','"+this.getCashIn()+"','"+this.getCashOut()+"', '"+this.total()+"');";
             st.executeUpdate(insert);    
             System.out.println("inserted");
             
-        }catch(Exception e){
+        }catch(Exception e){ System.out.println("work");
             System.out.println(e.getMessage());
         }
     }
@@ -73,15 +123,17 @@ public class summery extends javax.swing.JFrame {
     
     public Float searchlit() {
         float liter = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date();    
         //  id = jTextField1.getText();
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 1;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 2 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                liter += Float.valueOf(rs.getString(5));
+                liter += Float.valueOf(rs.getString(4));
                 
             }
             
@@ -94,15 +146,18 @@ public class summery extends javax.swing.JFrame {
 
     public Float searchlitPrize() {
         float litprize = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
+       
         //  id = jTextField1.getText();
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 1;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 2 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                litprize += Float.valueOf(rs.getString(6));
+                litprize += Float.valueOf(rs.getString(5));
                 
             }
             
@@ -114,16 +169,19 @@ public class summery extends javax.swing.JFrame {
     }
     
     public Float searchbot() {
+        
         float bottle = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         //  id = jTextField1.getText();
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 2;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 1 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                bottle += Float.valueOf(rs.getString(5));             
+                bottle += Float.valueOf(rs.getString(4));             
             }
             
         } catch (Exception e) {
@@ -134,16 +192,19 @@ public class summery extends javax.swing.JFrame {
     }
 
     public Float searchbotprize() {
+        
         //  id = jTextField1.getText();
         float bottleprize = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 2;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 1 " ;
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                bottleprize += Float.valueOf(rs.getString(6));
+                bottleprize += Float.valueOf(rs.getString(5));
                 
             }
             
@@ -155,16 +216,19 @@ public class summery extends javax.swing.JFrame {
     }
     
     public Float searchKilo() {
+       
         //  id = jTextField1.getText();
         float kilo = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 3;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 3 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                kilo += Float.valueOf(rs.getString(5));
+                kilo += Float.valueOf(rs.getString(4));
                 
             }
             
@@ -176,16 +240,19 @@ public class summery extends javax.swing.JFrame {
     }
 
     public Float searchKiloPrize() {
+        
         //  id = jTextField1.getText();
         float kiloprize = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 3;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 3 " ;
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                kiloprize += Float.valueOf(rs.getString(6));
+                kiloprize += Float.valueOf(rs.getString(5));
                 
             }
             
@@ -197,16 +264,19 @@ public class summery extends javax.swing.JFrame {
     }
     
     public Float searchPunak() {
+        
         //  id = jTextField1.getText();
         float punak = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 4;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 4 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                punak += Float.valueOf(rs.getString(5));
+                punak += Float.valueOf(rs.getString(4));
                 
             }
             
@@ -218,16 +288,19 @@ public class summery extends javax.swing.JFrame {
     }
 
     public Float searchPunakPrize() {
+        
         float punakprize = 0;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
         //  id = jTextField1.getText();
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String q = "SELECT * FROM sales WHERE ProId = " + 4;
+            String q = "SELECT * FROM `sales` WHERE `Date` = '"+df.format(dateobj)+"' AND `ProId` = 4 ";
             ResultSet rs = st.executeQuery(q);
             
             while (rs.next()) {
-                punakprize += Float.valueOf(rs.getString(6));
+                punakprize += Float.valueOf(rs.getString(5));
                 
             }
             
@@ -237,15 +310,21 @@ public class summery extends javax.swing.JFrame {
         
         return punakprize;
     }
+   
     
-    public Float getCashIn() {        
+    
+    public Float getCashIn() {  
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date();
         float cashin = 0;
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("select * from CashIn");
-            while (rs.next()) {                
-                cashin += Float.valueOf(rs.getString(2));                
+            String q = "SELECT * FROM `CashIn` WHERE `Date` = '"+df.format(dateobj)+"'";
+            ResultSet rs = st.executeQuery(q);            
+            while (rs.next()) {
+                cashin += Float.valueOf(rs.getString(3));
+                
             }
             
         } catch (Exception e) {
@@ -255,15 +334,21 @@ public class summery extends javax.swing.JFrame {
         
         return cashin;
     }
+   
 
     public Float getCashOut() {
-        float cashout = 0;        
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        Date dateobj = new Date(); 
+        float cashout = 0;
         try {
             Connection con = getconnection();
             Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery("select * from CashOut");
-            while (rs.next()) {                
-                cashout += Float.valueOf(rs.getString(2));
+            String q = "SELECT * FROM `CashOut` WHERE `Date` = '"+df.format(dateobj)+"'";
+            ResultSet rs = st.executeQuery(q);
+            
+            while (rs.next()) {
+                cashout += Float.valueOf(rs.getString(3));
+                
             }
             
         } catch (Exception e) {
@@ -275,6 +360,7 @@ public class summery extends javax.swing.JFrame {
     }
     
     public Float total(){
+        
         float sum = 0;
         sum = (this.balance()+this.getCashIn()+this.searchlitPrize()+this.searchbotprize()+this.searchKiloPrize()+this.searchPunakPrize())- this.getCashOut();
         
@@ -293,15 +379,17 @@ public class summery extends javax.swing.JFrame {
     public summery() {
         
         initComponents();
+        
+        jButton1.requestFocusInWindow();
         jLabel12.setText(String.valueOf(this.balance()));
         jLabel13.setText(String.valueOf(this.getCashIn()));    
         jLabel19.setText(String.valueOf(this.getCashOut()));
-        jLabel21.setText(String.valueOf(this.searchlit()));
-        jLabel22.setText(String.valueOf(this.searchbot()));
+        jLabel22.setText(String.valueOf(this.searchlit()));
+        jLabel21.setText(String.valueOf(this.searchbot()));
         jLabel23.setText(String.valueOf(this.searchKilo()));
         jLabel24.setText(String.valueOf(this.searchPunak()));
-        jLabel14.setText(String.valueOf(this.searchlitPrize()));
-        jLabel15.setText(String.valueOf(this.searchbotprize()));
+        jLabel15.setText(String.valueOf(this.searchlitPrize()));
+        jLabel14.setText(String.valueOf(this.searchbotprize()));
         jLabel16.setText(String.valueOf(this.searchKiloPrize()));
         jLabel17.setText(String.valueOf(this.searchPunakPrize()));
         jLabel18.setText(String.valueOf(this.totcash()));
@@ -352,8 +440,10 @@ public class summery extends javax.swing.JFrame {
         }); 
         jButton2.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent arg0) {              
-              daybalance();
+            public void actionPerformed(ActionEvent arg0) { 
+             
+             daybalance();             
+              
               }
             
         });
@@ -399,7 +489,7 @@ public class summery extends javax.swing.JFrame {
         jLabel24 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setPreferredSize(new java.awt.Dimension(460, 625));
+        setPreferredSize(new java.awt.Dimension(500, 625));
 
         jLabel1.setFont(new java.awt.Font("Ubuntu", 0, 36)); // NOI18N
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -415,10 +505,10 @@ public class summery extends javax.swing.JFrame {
         jLabel4.setText("Sales : -");
 
         jLabel5.setFont(new java.awt.Font("Ubuntu", 0, 24)); // NOI18N
-        jLabel5.setText("Liters : ");
+        jLabel5.setText("Bottles  : ");
 
         jLabel6.setFont(new java.awt.Font("Ubuntu", 0, 24)); // NOI18N
-        jLabel6.setText("Bottles :");
+        jLabel6.setText("Liters  :");
 
         jLabel7.setFont(new java.awt.Font("Ubuntu", 0, 24)); // NOI18N
         jLabel7.setText("Kilo : ");
@@ -504,36 +594,7 @@ public class summery extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel18))
                     .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel8)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel24))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel7)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel23))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel22))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel21)))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel14, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
-                            .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel17, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -553,14 +614,45 @@ public class summery extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 172, Short.MAX_VALUE))
+                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel11)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel24))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel7)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel23))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel22))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(jLabel5)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel21)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel17, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel11)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 277, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
