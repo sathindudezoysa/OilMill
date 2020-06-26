@@ -78,37 +78,34 @@ public class Main1 extends javax.swing.JFrame {
             System.out.println(e.getMessage());
             
         }
-     }
-         
+     }         
       public static String getCount(String title) {
         JPanel panel = new JPanel();
         final JTextField text = new JTextField(10);
-        panel.add(new JLabel("Count"));
+        panel.add(new JLabel("Given Amount"));
         panel.setFont(new Font("Arial", Font.BOLD, 24));
         panel.add(text);
         JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION) {
             @Override
             public void selectInitialValue() {
-                text.requestFocusInWindow();
-                
+                text.requestFocusInWindow();                
             }
         };
         pane.createDialog(null, title).setVisible(true);
         return text.getText().length() == 0 ? null : new String(text.getText());
     }
      
-      public void num1(int num){
-         if(num <= 4 && num > 0 ){
-              q = true;
-                          
-          }else{
+      public void num1(String num){
+         if(search(num)==""){
               JOptionPane.showMessageDialog(null,"Wrong id");
               q = false; 
-              jTextField1.setText("");
+              jTextField1.setText("");                                       
+          }else{
+              q = true; 
           }
           
       }
-    public void print(){
+    public String print(){
         
         DefaultTableModel model= (DefaultTableModel) jTable1.getModel();
         DecimalFormat decim = new DecimalFormat("0.00");
@@ -117,11 +114,8 @@ public class Main1 extends javax.swing.JFrame {
                         
             String body =search((String) model.getValueAt(i,0))+"\t"+model.getValueAt(i,1)+"\t"+getprize(Integer.parseInt((String) model.getValueAt(i, 0)))+"\t"+model.getValueAt(i,2)+"\n"; 
             bill +=body;
-            
-             }
-       // System.out.println(bill);
-        pf.setstring(bill,total());
-        pf.print();
+            }
+       return bill;
     }
      
      
@@ -261,7 +255,7 @@ public class Main1 extends javax.swing.JFrame {
         }
         
     }
-    public void chashout(){
+    public void chashout(double cash){
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date dateobj = new Date(); 
         int b = 0;
@@ -283,7 +277,7 @@ public class Main1 extends javax.swing.JFrame {
         try{
             Connection con = getconnection();
             Statement st = con.createStatement();
-            String insert = "INSERT INTO `CashOut` (`id`,`Date`, `Value`) VALUES ('"+b+"','"+df.format(dateobj)+"','"+cashOut +"');";
+            String insert = "INSERT INTO `CashOut` (`id`,`Date`, `Value`) VALUES ('"+b+"','"+df.format(dateobj)+"','"+cash +"');";
             st.executeUpdate(insert);    
             System.out.println("inserted");
             
@@ -354,14 +348,13 @@ public class Main1 extends javax.swing.JFrame {
                 
                 //JOptionPane.showMessageDialog(null, keyCode);
                 System.out.println(title + " : " + keyText + " / " + keyEvent.getKeyChar());
-                if(keyEvent.getKeyCode()== KeyEvent.VK_DIVIDE){
+                if(keyEvent.getKeyCode()== KeyEvent.VK_I){
                     cashIn = Integer.parseInt(Main1.getCount(title));
                     chashIn();
                     clean();
                     
-                }else if(keyEvent.getKeyCode()== KeyEvent.VK_MULTIPLY){
-                    cashOut = Integer.parseInt(Main1.getCount(title));
-                    chashout();
+                }else if(keyEvent.getKeyCode()== KeyEvent.VK_O){                    
+                    chashout(Float.valueOf(Main1.getCount(title)));
                     clean();
                     
                 }else if(keyEvent.getKeyCode()== KeyEvent.VK_V){                      
@@ -397,21 +390,25 @@ public class Main1 extends javax.swing.JFrame {
     public void actionPerformed(ActionEvent e) { 
         DecimalFormat decim = new DecimalFormat("0.00");
         if(jTextField1.getDocument().getLength() != 0){
-        num1(Integer.parseInt(jTextField1.getText()));
+        num1(jTextField1.getText());
         if(q){
             jLabel7.setText(search(jTextField1.getText()));            
             changecolour(jTextField1.getText());
             jTextField2.requestFocusInWindow();       //clean();
         }
         }else if(jTextField3.getDocument().getLength() != 0){
-            String count = decim.format(Float.valueOf(Main1.getCount("Count is ")));
+            String count = decim.format(Float.valueOf(Main1.getCount("Given Amount is: ")));
                     jTextField4.setText(count);
-                    JLabel label = new JLabel("Balance is: "+(Float.valueOf(count)- total()));
+                    double bal = Float.valueOf(count)- total();
+                    JLabel label = new JLabel("Balance is: "+String.valueOf(bal));
                     label.setFont(new Font("Arial", Font.BOLD, 24));
                     JOptionPane.showMessageDialog(null,label,"Balance",JOptionPane.WARNING_MESSAGE);
-                    //JOptionPane.showMessageDialog(null,"Balance is: "+(count - sum));
-                    print();
-                    writedata();                    
+                    pf.setstring(print(),total(),Float.valueOf(count),bal);
+                    pf.print();
+                    writedata();
+                    if(bal<0){
+                        chashout(-bal);                       
+                    }
                     clean();
                            
     }else {

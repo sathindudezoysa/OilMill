@@ -58,17 +58,19 @@ public class printer{
  
 		return null;
 	}
-    public void setstring(String body,double tot){
+    public void setstring(String body,double tot,double giv,double bal){
         String Header = 
          "          **Sekkuwa**\n"
         +"          091-2255898\n"
         +"Date: "+Date+"   Time: "+Time+"\n"
-        +"_________________________________\n"
+        +"---------------------------------\n"
         +"Name\tQty\tRate\tAmt\n"
         +"---------------------------------\n";
              bill = Header;
              bill += body;
-        String fotter=    "\nTotal Amount =\t\t"+decim.format(tot)+"\n"
+        String fotter= "\nTotal Amount =\t\t"+decim.format(tot)+"\n"
+                        +"Given Amount =\t\t"+decim.format(giv)+"\n"
+                        +"Balance =\t\t"+decim.format(bal)+"\n"
          +"********************************\n"
          + "          Thank you.\n";
         bill += fotter;

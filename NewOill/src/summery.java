@@ -390,7 +390,7 @@ public class summery extends javax.swing.JFrame {
                    
              
      //  System.out.println(body);
-      pf.setstring(body,total());
+      pf.setstring(body,total(),0,0);
       pf.print();
     }
 
